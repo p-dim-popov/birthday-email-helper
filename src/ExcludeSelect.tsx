@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type Props = {
   options: string[];
@@ -13,6 +13,16 @@ export function ExcludeSelect({ options, excluded, onChange }: Props) {
   const boxRef = useRef<HTMLDivElement>(null);
 
   const excludedSet = useMemo(() => new Set(excluded), [excluded]);
+
+  // Close the dropdown when clicking anywhere outside this component.
+  useEffect(() => {
+    if (!open) return;
+    function onPointerDown(e: PointerEvent) {
+      if (boxRef.current && !boxRef.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
+  }, [open]);
 
   const matches = useMemo(() => {
     const q = query.trim().toLowerCase();
